@@ -55,4 +55,17 @@ public class Threading extends JPanel implements Runnable {
 			}
 		}
 	}	
+	
+	public void done() {
+		
+		try {
+			
+		gameThread = null;
+		
+		}
+		
+		catch (Exception e) {
+			
+		}
+	}
 }

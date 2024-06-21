@@ -1,24 +1,15 @@
 package object;
 
-import java.io.IOException;
+import Main.GamePanel;
+import entity.Entity;
 
-import javax.imageio.ImageIO;
-
-public class objectKey extends superObject {
+public class objectKey extends Entity {
 	
-	public objectKey() {
+	public objectKey(GamePanel gp) {
+		super(gp);
 		
 		name = "Key";
-		
-		try {
-			image = ImageIO.read(getClass().getResourceAsStream("/objects/key.png"));
-		}
-		
-		catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-		//ni kalau nak setting specific collision area tuk object katakan
-		//solidArea.x = 5;
+		down1 = imageSetup("/objects/key");
+
 	}
 }

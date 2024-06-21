@@ -3,25 +3,20 @@ package entity;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-
-import javax.imageio.ImageIO;
-
 import Main.GamePanel;
 import Main.KeyHandler;
 
 public class Player extends Entity {
 	
-	GamePanel gp;
 	KeyHandler keyH;
 	
 	//camera paning variables
 	public final int screenX;
 	public final int screenY;
 	
-	public int hasKey = 0;
-	
 	public Player(GamePanel gp, KeyHandler keyH) {
+		
+		super(gp);
 		
 		this.gp = gp;
 		this.keyH = keyH;
@@ -47,29 +42,31 @@ public class Player extends Entity {
 		//scale 48
 		worldX = gp.tileSize * 23;
 		worldY = gp.tileSize * 21;
+				
 		speed = 4;
 		direction = "down";
+		
+		//player status
+		//1 life equals to half heart
+		maxLife = 6;
+		life = maxLife;
 	}
 	
 	//player movement image
 	public void getPlayerImage() {
 		
-		try {
-			
-			up1 = ImageIO.read(getClass().getResourceAsStream("/player/boy_up_1.png"));
-			up2 = ImageIO.read(getClass().getResourceAsStream("/player/boy_up_2.png"));
-			down1 = ImageIO.read(getClass().getResourceAsStream("/player/boy_down_1.png"));
-			down2 = ImageIO.read(getClass().getResourceAsStream("/player/boy_down_2.png"));
-			right1 = ImageIO.read(getClass().getResourceAsStream("/player/boy_right_1.png"));
-			right2 = ImageIO.read(getClass().getResourceAsStream("/player/boy_right_2.png"));
-			left1 = ImageIO.read(getClass().getResourceAsStream("/player/boy_left_1.png"));
-			left2 = ImageIO.read(getClass().getResourceAsStream("/player/boy_left_2.png"));
-		}
+		up1 = imageSetup("/player/boy_up_1");
+		up2 = imageSetup("/player/boy_up_2");
+		down1 = imageSetup("/player/boy_down_1");
+		down2 = imageSetup("/player/boy_down_2");
+		right1 = imageSetup("/player/boy_right_1");
+		right2 = imageSetup("/player/boy_right_2");
+		left1 = imageSetup("/player/boy_left_1");
+		left2 = imageSetup("/player/boy_left_2");
 		
-		catch(IOException e) {
-			
-		}
 	}
+	
+
 	public void update() {
 		//System.out.println("check2");
 		
@@ -98,6 +95,19 @@ public class Player extends Entity {
 			//check kalau player langgar object
 			int objIndex = gp.collisionDetector.checkPlayerCollideWithObject(this, true);
 			pickObject(objIndex);
+			
+			//npc collision
+			int npcIndex = gp.collisionDetector.checkPlayerCollideWithEntity(this, gp.npc);
+			interactWithNPC(npcIndex);
+			
+			//check monster collison
+			int monsterIndex = gp.collisionDetector.checkPlayerCollideWithEntity(this, gp.monster);
+			contactMonster(monsterIndex);
+			
+			//event collison
+			gp.eHandler.checkEvent();
+			
+			gp.keyH.enterPressed = false;
 			
 			//if collison false, player allowed to move
 			if (collisionOn == false) {
@@ -141,12 +151,35 @@ public class Player extends Entity {
 
 	}
 	
+	public void contactMonster(int i) {
+		
+		if (i != 999) {
+			
+			life -= 1;
+		}
+		
+		
+	}
+
+	public void interactWithNPC(int i) {
+		
+		if(i != 999) {
+			
+			if(gp.keyH.enterPressed == true) {
+				gp.gameState = gp.dialogState;
+				gp.npc[i].speak();
+			}
+		}
+		
+	}
+
 	public void pickObject (int i) {
 		
 		//999 dtg drpd index playerCollideObject kat collisionDetector, any number work as long bukan number object punya array
 		//takut ganggu
 		if (i != 999) {
 			
+			int hasKey = 0;
 			//langgar object hilang sbb bila yg langgar object tu player, index berubah jdi != 999
 			
 			//testing response
@@ -159,16 +192,21 @@ public class Player extends Entity {
 				hasKey++;
 				gp.obj[i] = null;
 				//System.out.println("Key: " + hasKey);
+				gp.ui.displayNotification("You picked up a key!");
 			}
 			
 			else if(objectName == "Door") {
+				
 				if (hasKey > 0) {
 					gp.playSoundEffectAudio(2);
 					gp.obj[i] = null;
 					hasKey--;
-					//System.out.println("Key: " + hasKey);
+					gp.ui.displayNotification("You unlocked the door!");
+					
 				}
 				
+				else gp.ui.displayNotification("The door is locked. "
+						+ "Try find some keys around the world!");
 				//else gp.playSoundEffectAudio(3);
 			}
 			
@@ -176,6 +214,12 @@ public class Player extends Entity {
 				gp.playSoundEffectAudio(3);
 				gp.obj[i] = null;
 				speed += 2;
+				gp.ui.displayNotification("You found a boot! Speed Up!");
+			}
+			
+			else if(objectName == "Chest") {
+				gp.ui.gameOver = true;
+				gp.stopAudio();
 			}
 			
 		}
@@ -231,7 +275,7 @@ public class Player extends Entity {
 			
 		}
 		
-		g2.drawImage(image, screenX, screenY, gp.tileSize, gp.tileSize, null);
+		g2.drawImage(image, screenX, screenY, null);
 	}
 	
 }

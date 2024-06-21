@@ -93,73 +93,28 @@ public class CollisionDetector {
 				gp.obj[i].solidArea.y = gp.obj[i].worldY + gp.obj[i].solidArea.y;
 			
 				//checking collision
-				if(entity.direction == "up") {
-					
-					entity.playerBodyArea.y -= entity.speed;
-					
-					if(entity.playerBodyArea.intersects(gp.obj[i].solidArea)) {
-						//System.out.println("up collide");
-						if (gp.obj[i].collision == true) {
-							entity.collisionOn = true;
-						}
-						
-						if (player == true) {
-							//elak npc amik object kalau implement nnti
-							index = i;
-						}
-					}
-					
+				if(entity.direction == "up") {					
+					entity.playerBodyArea.y -= entity.speed;				
 				}
-
 				else if(entity.direction == "down") {
-					
 					entity.playerBodyArea.y += entity.speed;
-					
-					if(entity.playerBodyArea.intersects(gp.obj[i].solidArea)) {
-						//System.out.println("down collide");
-						if (gp.obj[i].collision == true) {
-							entity.collisionOn = true;
-						}
-						
-						if (player == true) {
-							//elak npc amik object kalau implement nnti
-							index = i;
-						}
-					}
-					
 				}
-				
 				else if(entity.direction == "left") {
-					
 					entity.playerBodyArea.x -= entity.speed;
-					
-					if(entity.playerBodyArea.intersects(gp.obj[i].solidArea)) {
-						//System.out.println("left collide");
-						if (gp.obj[i].collision == true) {
-							entity.collisionOn = true;
-						}
-						
-						if (player == true) {
-							//elak npc amik object kalau implement nnti
-							index = i;
-						}
-					}
+				}
+				else if(entity.direction == "right") {
+					entity.playerBodyArea.x += entity.speed;
 				}
 				
-				else if(entity.direction == "right") {
+				if(entity.playerBodyArea.intersects(gp.obj[i].solidArea)) {
+					//System.out.println("left collide");
+					if (gp.obj[i].collision == true) {
+						entity.collisionOn = true;
+					}
 					
-					entity.playerBodyArea.x += entity.speed;
-
-					if(entity.playerBodyArea.intersects(gp.obj[i].solidArea)) {
-						//System.out.println("right collide");
-						if (gp.obj[i].collision == true) {
-							entity.collisionOn = true;
-						}
-						
-						if (player == true) {
-							//elak npc amik object kalau implement nnti
-							index = i;
-						}
+					if (player == true) {
+						//elak npc amik object kalau implement nnti
+						index = i;
 					}
 				}
 				
@@ -175,4 +130,76 @@ public class CollisionDetector {
 		return index;
 	}
 	
+	//checking npc or monster collision
+	public int checkPlayerCollideWithEntity(Entity entity, Entity[] target) {
+	    int index = 999;
+	    
+	    for (int i = 0; i < target.length; i++) {
+	        if (target[i] != null) {
+	            // Get positions of entity and target solid areas
+	            entity.playerBodyArea.x = entity.worldX + entity.playerBodyArea.x;
+	            entity.playerBodyArea.y = entity.worldY + entity.playerBodyArea.y;
+	            
+	            target[i].playerBodyArea.x = target[i].worldX + target[i].playerBodyArea.x;
+	            target[i].playerBodyArea.y = target[i].worldY + target[i].playerBodyArea.y;
+	            
+	            // Checking collision
+	            if (entity.direction.equals("up")) {
+	                entity.playerBodyArea.y -= entity.speed;          
+	            } else if (entity.direction.equals("down")) {
+	                entity.playerBodyArea.y += entity.speed;
+	            } else if (entity.direction.equals("left")) {
+	                entity.playerBodyArea.x -= entity.speed;
+	            } else if (entity.direction.equals("right")) {
+	                entity.playerBodyArea.x += entity.speed;
+	            }
+	            
+	            if (entity.playerBodyArea.intersects(target[i].playerBodyArea)) {
+	            	if(target[i] != entity) {
+	                    entity.collisionOn = true;
+	                    index = i;
+	            	}
+                }
+	            
+	            // Reset positions to default after collision check
+	            entity.playerBodyArea.x = entity.solidDefaultAreaX;
+	            entity.playerBodyArea.y = entity.solidDefaultAreaY;
+	            target[i].playerBodyArea.x = target[i].solidDefaultAreaX;
+	            target[i].playerBodyArea.y = target[i].solidDefaultAreaY;
+	        }
+	    }
+	    
+	    return index;
+	}
+
+	public void checkEntityCollideWithPlayer(Entity entity) {
+		
+		// Get positions of entity and target solid areas
+        entity.playerBodyArea.x = entity.worldX + entity.playerBodyArea.x;
+        entity.playerBodyArea.y = entity.worldY + entity.playerBodyArea.y;
+        
+        gp.player.playerBodyArea.x =  gp.player.worldX +  gp.player.playerBodyArea.x;
+        gp.player.playerBodyArea.y =  gp.player.worldY +  gp.player.playerBodyArea.y;
+        
+        // Checking collision
+        if (entity.direction.equals("up")) {
+            entity.playerBodyArea.y -= entity.speed;
+        } else if (entity.direction.equals("down")) {
+            entity.playerBodyArea.y += entity.speed;
+        } else if (entity.direction.equals("left")) {
+            entity.playerBodyArea.x -= entity.speed;
+        } else if (entity.direction.equals("right")) {
+            entity.playerBodyArea.x += entity.speed;
+        }
+        
+        if (entity.playerBodyArea.intersects(gp.player.playerBodyArea)) {
+            entity.collisionOn = true;
+        }
+        
+        // Reset positions to default after collision check
+        entity.playerBodyArea.x = entity.solidDefaultAreaX;
+        entity.playerBodyArea.y = entity.solidDefaultAreaY;
+        gp.player.playerBodyArea.x = gp.player.solidDefaultAreaX;
+        gp.player.playerBodyArea.y = gp.player.solidDefaultAreaY;
+	}
 }

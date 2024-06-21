@@ -18,8 +18,12 @@ public class FirstWindow extends JFrame {
 	private JMenuBar menuBar;
 	private JMenu audioMenuBar;
 	private JMenuItem muteMenuItem;
+	private boolean isMuted = false;
 
-	public FirstWindow() {
+	public FirstWindow(GamePanel gp) {
+		
+		this.gp = gp;
+		
 		setTitle("MyGame");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 407, 265);
@@ -37,11 +41,23 @@ public class FirstWindow extends JFrame {
 		muteMenuItem = new JMenuItem("Mute");
 		muteMenuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				//System.out.println("clicked");
-				gp.stopAudio(0);;
-			}
+				
+				if (isMuted == false) {
+                    gp.gameAudio.stop();
+                    muteMenuItem.setText("Unmute");
+                    isMuted = true;
+                } 
+				
+				else {
+                    gp.gameAudio.play();
+                    muteMenuItem.setText("Mute");
+                    isMuted = false;
+                }
+            }
+			
 		});
 		audioMenuBar.add(muteMenuItem);
+		
 		setContentPane(contentPane);
 	}
 
